@@ -25,6 +25,7 @@ export default function SelectDisplay() {
             {song.cover && <img src={song.cover} alt="Song Cover" />}
             <div className="flex flex-col gap-1">
               <p>{song.title}</p>
+              <p>on {song.album}</p>
               <p>by {song.artists.join()}</p>
             </div>
           </div>
@@ -35,10 +36,17 @@ export default function SelectDisplay() {
 }
 
 function UploadSongs({ data, setData }: { data: Song[], setData: Dispatch<SetStateAction<Song[]>> }) {
-  const [songFiles, setSongFiles] = useState<File[]>([]);
+  function processFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    if (e.target.files === null) return;
+    for (const file of e.target.files) {
+      // idk what to do with this yet :sob:
+      console.log(file);
+    }
+  }
   return (
-    <form>
-
-    </form>
-  )
+    <input type="file" multiple={true} onChange={processFiles}
+      accept="audio/flac,audio/mpeg,audio/ogg,audio/aac,audio/m4a,audio/wav"
+      className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+    />
+  );
 }
