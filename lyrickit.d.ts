@@ -4,7 +4,7 @@ export type Song = {
   album?: string;
   artists?: string[];
   cover: Blob | null;
-  lyrics: string | null;
+  lyrics: string;
   synced: boolean;
   audioHandle: FileSystemFileHandle | null;
 };
