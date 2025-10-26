@@ -1,9 +1,11 @@
 "use client"
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import type { Song } from "@/lyrickit";
+import { parseBlob } from "music-metadata";
 
-export default function SelectDisplay() {
+export default function SongSelector() {
   const [songData, setSongData] = useState<Song[]>([]);
+
   return (
     <div className="grid grid-rows-2 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
       <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 md:col-span-2">
@@ -19,51 +21,68 @@ export default function SelectDisplay() {
       </div>
       <div className="flex flex-col bg-slate-500 rounded-lg text-center p-2">
         <h1 className="text-xl font-semibold">Selected Songs</h1>
-        {songData.map((song) => (
-          <div key={song.title} className="flex gap-2">
-            {/** biome-ignore lint/performance/noImgElement: cover is from filesystem, doesn't have a defined source */}
-            {song.cover && <img src={song.cover} alt="Song Cover" />}
-            <div className="flex flex-col gap-1">
-              <p>{song.title}</p>
-              <p>on {song.album}</p>
-              <p>by {song.artists.join()}</p>
-            </div>
-          </div>
-        ))}
+        <SongDisplay data={songData} />
       </div>
     </div>
   );
 }
 
+function SongDisplay({ data }: { data: Song[] }) {
+  return (
+    <div>
+      {data.map((song) => (
+        <div key={song.title} className="flex gap-2">
+          {/** biome-ignore lint/performance/noImgElement: cover is from filesystem, doesn't have a defined source */}
+          {song.cover && <img src={song.cover} alt="Song Cover" />}
+          <div className="flex flex-col gap-1">
+            <p>{song.title}</p>
+            <p>on {song.album || "Unknown Album"}</p>
+            <p>by {(song.artists || ["Unknown Artist"]).join()}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function UploadSongs({ data, setData }: { data: Song[], setData: Dispatch<SetStateAction<Song[]>> }) {
-  function processFiles(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files === null) return;
-    for (const file of e.target.files) {
-      // idk what to do with this yet :sob:
-      console.log(file);
-      switch (file.type) {
-        case "audio/flac":
-          break;
-        case "audio/mpeg":
-          break;
-        case "audio/ogg":
-          break;
-        case "audio/aac":
-          break;
-        case "audio/m4a":
-          break;
-        case "audio/wav":
-          break;
-        default:
-          alert(`[error] Unknown file type "${file.type}" for file "${file.name}"`);
-          break;
+  async function processFiles() {
+    try {
+      // @ts-expect-error - api exists despite not having a type :3
+      const handles: FileSystemFileHandle[] = await window.showOpenFilePicker({
+        multiple: true,
+        types: [{
+          description: "Song files",
+          accept: { "audio/*": [".flac", ".mp3", ".ogg", ".aac", ".m4a", ".wav"] }
+        }]
+      });
+      const newSongs: Song[] = [];
+      for (const handle of handles) {
+        const file = await handle.getFile();
+        const metadata = await parseBlob(file);
+
+        const picture = metadata.common.picture?.[0];
+        let coverBlob: Blob | null = null;
+        if (picture) {
+          const uint8 = new Uint8Array(picture.data);
+          coverBlob = new Blob([uint8], { type: picture.format });
+        }
+        newSongs.push({
+          title: metadata.common.title || file.name.replace(/\.[^/.]+$/, ""),
+          album: metadata.common.album,
+          artists: metadata.common.artists,
+          cover: coverBlob,
+          lyrics: null,
+          synced: false,
+          audioHandle: handle
+        });
+      }
+      setData([...data, ...newSongs]);
+    } catch (err) {
+      if ((err as DOMException).name !== "AbortError") {
+        console.error(err);
       }
     }
   }
-  return (
-    <input type="file" multiple={true} onChange={processFiles}
-      accept="audio/flac,audio/mpeg,audio/ogg,audio/aac,audio/m4a,audio/wav"
-      className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
-    />
-  );
+  return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2">Select Songs</button>
 }
