@@ -41,6 +41,23 @@ function UploadSongs({ data, setData }: { data: Song[], setData: Dispatch<SetSta
     for (const file of e.target.files) {
       // idk what to do with this yet :sob:
       console.log(file);
+      switch (file.type) {
+        case "audio/flac":
+          break;
+        case "audio/mpeg":
+          break;
+        case "audio/ogg":
+          break;
+        case "audio/aac":
+          break;
+        case "audio/m4a":
+          break;
+        case "audio/wav":
+          break;
+        default:
+          alert(`[error] Unknown file type "${file.type}" for file "${file.name}"`);
+          break;
+      }
     }
   }
   return (
