@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { db } from "@/utils/db";
 import defaultCover from "@/public/defaultCover.jpeg";
 import type { Song } from "@/lyrickit";
+import Link from "next/link";
 
 export default function SongDisplay() {
   const songData = useLiveQuery(() => db.songs.toArray());
@@ -15,6 +16,11 @@ export default function SongDisplay() {
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2">
       <h1 className="text-xl font-semibold mb-2">Selected Songs</h1>
       {songData?.map((song) => <SongCard song={song} key={song.title} />)}
+      {songData?.length === 0 && <div className="flex flex-col gap-2">
+        <p>You haven't added any songs yet!</p>  
+        <Link href={"/select"} className="p-2 rounded-lg bg-violet-300 text-black">Pick Songs</Link>
+      </div>}
+      {songData === undefined && <p>Loading songs...</p>}
     </div>
   );
 }
