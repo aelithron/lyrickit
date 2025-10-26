@@ -1,7 +1,10 @@
 "use client"
+// biome-ignore assist/source/organizeImports: idk what this is asking me to change
 import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import type { Song } from "@/lyrickit";
 import { parseBlob } from "music-metadata";
+import defaultCover from "@/public/defaultCover.jpeg"
+import Image from "next/image";
 
 export default function SongSelector() {
   const [songData, setSongData] = useState<Song[]>([]);
@@ -19,30 +22,31 @@ export default function SongSelector() {
           <p>Coming Soon...</p>
         </div>
       </div>
-      <div className="flex flex-col bg-slate-500 rounded-lg text-center p-2">
-        <h1 className="text-xl font-semibold">Selected Songs</h1>
-        <SongDisplay data={songData} />
+      <div className="flex flex-col bg-slate-500 rounded-lg text-center p-2 gap-2">
+        <h1 className="text-xl font-semibold mb-2">Selected Songs</h1>
+        {songData.map((song) => <SongDisplay song={song} key={song.title} />)}
       </div>
     </div>
   );
 }
 
-function SongDisplay({ data }: { data: Song[] }) {
+function SongDisplay({ song }: { song: Song }) {
+  const url = song.cover ? URL.createObjectURL(song.cover) : null;
+  useEffect(() => {
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [url]);
   return (
-    <div>
-      {data.map((song) => (
-        <div key={song.title} className="flex gap-2">
-          {/** biome-ignore lint/performance/noImgElement: cover is from filesystem, doesn't have a defined source */}
-          {song.cover && <img src={song.cover} alt="Song Cover" />}
-          <div className="flex flex-col gap-1">
-            <p>{song.title}</p>
-            <p>on {song.album || "Unknown Album"}</p>
-            <p>by {(song.artists || ["Unknown Artist"]).join()}</p>
-          </div>
-        </div>
-      ))}
+    <div className="flex gap-3 items-center">
+      <Image src={url ? url : defaultCover} alt="Song Cover" width={256} height={256} className="h-32 w-32 rounded-md" />
+      <div className="flex flex-col text-start">
+        <p className="text-lg font-semibold">{song.title}</p>
+        <p>by {(song.artists || ["Unknown Artist"]).join()}</p>
+        <p>on {song.album || "Unknown Album"}</p>
+      </div>
     </div>
-  )
+  );
 }
 
 function UploadSongs({ data, setData }: { data: Song[], setData: Dispatch<SetStateAction<Song[]>> }) {
@@ -61,11 +65,11 @@ function UploadSongs({ data, setData }: { data: Song[], setData: Dispatch<SetSta
         const file = await handle.getFile();
         const metadata = await parseBlob(file);
 
-        const picture = metadata.common.picture?.[0];
+        const picture = metadata.common.picture;
         let coverBlob: Blob | null = null;
         if (picture) {
-          const uint8 = new Uint8Array(picture.data);
-          coverBlob = new Blob([uint8], { type: picture.format });
+          const uint8 = new Uint8Array(picture[0].data);
+          coverBlob = new Blob([uint8], { type: picture[0].format });
         }
         newSongs.push({
           title: metadata.common.title || file.name.replace(/\.[^/.]+$/, ""),
