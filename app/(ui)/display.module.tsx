@@ -34,7 +34,7 @@ export default function SongDisplay() {
   );
 }
 
-function SongCard({ song }: { song: Song }) {
+export function SongCard({ song }: { song: Song }) {
   const pathname = usePathname();
   const url = song.cover ? URL.createObjectURL(song.cover) : null;
   useEffect(() => {
