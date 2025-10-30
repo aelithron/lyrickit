@@ -6,7 +6,7 @@ import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faSave, faSync } from "@fortawesome/free-solid-svg-icons";
+import { faCheck, faPlay, faSave, faSync } from "@fortawesome/free-solid-svg-icons";
 
 export default function EditLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
@@ -51,13 +51,15 @@ export default function EditLyrics() {
     <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
       <div className="flex flex-col text-center p-3 gap-2 md:col-span-2">
         {activeSong ? <form className="flex flex-col gap-2 p-2 items-center" onSubmit={handleSubmit}>
+          <p>{activeSong.title} - {(activeSong.artists || ["Unknown Artist"]).join()}</p>
+          <MusicPlayer song={activeSong} />
           <textarea className="bg-slate-500 rounded-md p-1 w-full" placeholder="Write lyrics here..." value={activeLyrics} onChange={changeLyrics} rows={6} />
           <div className="flex gap-2 items-center">
             <button type="submit" className="bg-violet-300 rounded-lg text-black p-1"><FontAwesomeIcon icon={faSave} /> Save</button>
             <p className="bg-slate-500 rounded-lg p-1 text-sm">Status: {saved ? <FontAwesomeIcon icon={faCheck} /> : <FontAwesomeIcon icon={faSync} />}</p>
           </div>
         </form> :
-        <p className="bg-slate-500 rounded-md p-1 w-full">Select a song from the menu to edit the lyrics!</p>}
+          <p className="bg-slate-500 rounded-md p-1 w-full">Select a song from the menu to edit the lyrics!</p>}
       </div>
       <SongList songData={songData} changeActive={changeActive} />
     </div>
@@ -74,6 +76,51 @@ function SongList({ songData, changeActive }: { songData: Song[] | undefined, ch
         <Link href={"/select"} className="p-2 rounded-lg bg-violet-300 text-black">Pick Songs</Link>
       </div>}
       {songData === undefined && <p>Loading songs...</p>}
+    </div>
+  );
+}
+
+function MusicPlayer({ song }: { song: Song }) {
+  const [songFile, setSongFile] = useState<File | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    if (songFile) {
+      objectUrl = URL.createObjectURL(songFile);
+      setUrl(objectUrl);
+    } else {
+      setUrl(null);
+    }
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [songFile]);
+  async function loadSong() {
+    if (song.audioHandle) {
+      try {
+        setSongFile(await song.audioHandle.getFile());
+        return;
+      } catch { }
+    }
+    try {
+      // @ts-expect-error - api exists despite not having a type :3
+      const [handle]: FileSystemFileHandle = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{
+          description: `Song file (for "${song.title}")`,
+          accept: { "audio/*": [".flac", ".mp3", ".ogg", ".aac", ".m4a", ".wav"] }
+        }]
+      });
+      song.audioHandle = handle;
+      await db.songs.update(song.id, song)
+      setSongFile(await handle.getFile());
+    } catch (err) {
+      if ((err as DOMException).name !== "AbortError") console.error(err);
+    }
+  }
+  return (
+    <div>
+      {!songFile && <button type="button" onClick={loadSong}><FontAwesomeIcon icon={faPlay} /> Play Song</button>}
+      {/** biome-ignore lint/a11y/useMediaCaption: content is variable, can't caption beforehand! */}
+      {songFile && <audio src={url || undefined} controls={true} />}
     </div>
   );
 }
