@@ -102,23 +102,28 @@ function MusicPlayer({ song }: { song: Song }) {
     }
     try {
       // @ts-expect-error - api exists despite not having a type :3
-      const [handle]: FileSystemFileHandle = await window.showOpenFilePicker({
+      const handle: FileSystemFileHandle = await window.showOpenFilePicker({
         multiple: false,
         types: [{
-          description: `Song file (for "${song.title}")`,
+          description: `Song file (for "${song.title}"${song.artists && ` - ${song.artists.join()}`})`,
           accept: { "audio/*": [".flac", ".mp3", ".ogg", ".aac", ".m4a", ".wav"] }
         }]
       });
+      if (!handle) return;
       song.audioHandle = handle;
-      await db.songs.update(song.id, song)
+      await db.songs.update(song.id, song);
       setSongFile(await handle.getFile());
     } catch (err) {
+      if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
+        alert("File selection doesn't work with your browser!");
+        return;
+      }
       if ((err as DOMException).name !== "AbortError") console.error(err);
     }
   }
   return (
     <div>
-      {!songFile && <button type="button" onClick={loadSong}><FontAwesomeIcon icon={faPlay} /> Play Song</button>}
+      {!songFile && <button type="button" onClick={loadSong} className="bg-violet-300 rounded-lg p-1 text-black"><FontAwesomeIcon icon={faPlay} /> Play Song</button>}
       {/** biome-ignore lint/a11y/useMediaCaption: content is variable, can't caption beforehand! */}
       {songFile && <audio src={url || undefined} controls={true} />}
     </div>
