@@ -30,6 +30,7 @@ export function UploadSongs() {
           album: metadata.common.album,
           artists: metadata.common.artists,
           cover: coverBlob,
+          lyricSource: null,
           lyrics: "",
           synced: false,
           audioHandle: handle
