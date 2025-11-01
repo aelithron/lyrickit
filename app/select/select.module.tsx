@@ -40,7 +40,7 @@ export function UploadSongs() {
       await db.songs.bulkAdd(newSongs);
     } catch (err) {
       if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
-        alert("File selection doesn't work with your browser!");
+        alert("File selection doesn't work with your browser! Try using this site with Chrome (or something based on it).");
         return;
       }
       if ((err as DOMException).name !== "AbortError") console.error(err);

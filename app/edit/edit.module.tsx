@@ -1,25 +1,25 @@
 "use client";
+import { faCheck, faPlay, faSave, faSync } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useLiveQuery } from "dexie-react-hooks";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faPlay, faSave, faSync } from "@fortawesome/free-solid-svg-icons";
 
 export default function EditLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
   const [activeSong, setActiveSong] = useState<Song | null>(null);
   const [activeLyrics, setActiveLyrics] = useState<string>("");
   const [saved, setSaved] = useState<boolean>(true);
-  async function changeActive(song: Song) {
+  async function changeActive(newSong: Song) {
     if (activeSong !== null && !saved) {
       await saveSong();
       setSaved(true);
     }
-    setActiveSong(song);
-    setActiveLyrics(song.lyrics);
+    setActiveSong(newSong);
+    setActiveLyrics(newSong.lyrics);
   }
   async function saveSong() {
     if (!activeSong) return;
@@ -93,6 +93,8 @@ function MusicPlayer({ song }: { song: Song }) {
     }
     return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
   }, [songFile]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: this is the only way i can figure out making the music player reload on song change
+  useEffect(() => setSongFile(null), [song.id]);
   async function loadSong() {
     if (song.audioHandle) {
       try {
@@ -125,7 +127,7 @@ function MusicPlayer({ song }: { song: Song }) {
       setSongFile(file);
     } catch (err) {
       if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
-        alert("File selection doesn't work with your browser!");
+        alert("File selection doesn't work with your browser! Try using this site with Chrome (or something based on it).");
         return;
       }
       if ((err as DOMException).name !== "AbortError") console.error(err);
@@ -135,7 +137,7 @@ function MusicPlayer({ song }: { song: Song }) {
     <div>
       {!songFile && <button type="button" onClick={loadSong} className="bg-violet-300 rounded-lg p-1 text-black"><FontAwesomeIcon icon={faPlay} /> Play Song</button>}
       {/** biome-ignore lint/a11y/useMediaCaption: content is variable, can't caption beforehand! */}
-      {songFile && <audio src={url || undefined} controls={true} />}
+      {songFile && <audio src={url || undefined} controls={true} autoPlay={true} />}
     </div>
   );
 }
