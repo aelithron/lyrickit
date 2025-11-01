@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { parseBlob } from "music-metadata";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";

@@ -69,7 +69,7 @@ export default function EditLyrics() {
 function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2">
-      <h1 className="text-xl font-semibold mb-2">Selected Songs</h1>
+      <h1 className="text-xl font-semibold mb-2">Songs</h1>
       {songData?.map((song) => <button key={song.title} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
       {songData?.length === 0 && <div className="flex flex-col gap-2">
         <p>You haven't added any songs yet!</p>
