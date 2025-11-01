@@ -8,4 +8,5 @@ export type Song = {
   lyrics: string;
   synced: boolean;
   audioHandle: FileSystemFileHandle | null;
+  fileID: string | null;
 };

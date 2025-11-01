@@ -33,7 +33,8 @@ export function UploadSongs() {
           lyricSource: null,
           lyrics: "",
           synced: false,
-          audioHandle: handle
+          audioHandle: handle,
+          fileID: `${file.name}-${file.size}-${file.lastModified}`
         });
       }
       await db.songs.bulkAdd(newSongs);

@@ -22,7 +22,7 @@ export default function EditLyrics() {
     setActiveLyrics(song.lyrics);
   }
   async function saveSong() {
-    if (!activeSong || !activeLyrics || activeLyrics === "") return;
+    if (!activeSong) return;
     activeSong.lyrics = activeLyrics;
     setActiveSong(activeSong);
     await db.songs.update(activeSong.id, activeSong);
@@ -38,7 +38,7 @@ export default function EditLyrics() {
   }
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!activeSong || !activeLyrics || activeLyrics === "") return;
+      if (!activeSong) return;
       activeSong.lyrics = activeLyrics;
       setActiveSong(activeSong);
       db.songs.update(activeSong.id, activeSong);
@@ -96,23 +96,33 @@ function MusicPlayer({ song }: { song: Song }) {
   async function loadSong() {
     if (song.audioHandle) {
       try {
-        setSongFile(await song.audioHandle.getFile());
+        const file = await song.audioHandle.getFile();
+        if (song.fileID !== `${file.name}-${file.size}-${file.lastModified}`) {
+          const value = confirm(`The file you selected, "${file.name}", doesn't match the one you originally selected! Still import it?`);
+          if (!value) return;
+        }
+        setSongFile(file);
         return;
       } catch { }
     }
     try {
       // @ts-expect-error - api exists despite not having a type :3
-      const handle: FileSystemFileHandle = await window.showOpenFilePicker({
+      const handles: FileSystemFileHandle[] = await window.showOpenFilePicker({
         multiple: false,
         types: [{
-          description: `Song file (for "${song.title}"${song.artists && ` - ${song.artists.join()}`})`,
+          description: `Song file (for "${song.title}"${song.artists && ` - ${(song.artists || ["Unknown Artist"]).join()}`})`,
           accept: { "audio/*": [".flac", ".mp3", ".ogg", ".aac", ".m4a", ".wav"] }
         }]
       });
-      if (!handle) return;
-      song.audioHandle = handle;
+      if (!handles || !handles[0]) return;
+      const file = await handles[0].getFile();
+      if (song.fileID !== `${file.name}-${file.size}-${file.lastModified}`) {
+        const value = confirm(`The file you selected, "${file.name}", doesn't match the one you originally selected! Still import it?`);
+        if (!value) return;
+      }
+      song.audioHandle = handles[0];
       await db.songs.update(song.id, song);
-      setSongFile(await handle.getFile());
+      setSongFile(file);
     } catch (err) {
       if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
         alert("File selection doesn't work with your browser!");
