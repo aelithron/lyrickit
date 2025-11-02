@@ -23,7 +23,10 @@ export default function SyncLyrics() {
   return (
     <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
       <div className="flex flex-col text-center p-3 gap-2 md:col-span-2">
-        
+        {activeSong ? <div>
+          <p>{activeSong.title} - {(activeSong.artists || ["Unknown Artist"]).join()}</p>
+          <LyricDisplay song={activeSong} />
+        </div> : <p className="bg-slate-500 rounded-md p-1 w-full">Select a song from the menu to sync the lyrics!</p>}
       </div>
       <SongList songData={songData} changeActive={changeActive} />
     </div>
@@ -44,6 +47,16 @@ function SongList({ songData, changeActive }: { songData: Song[] | undefined, ch
         </div>
       </div>}
       {songData === undefined && <p>Loading songs...</p>}
+    </div>
+  );
+}
+
+function LyricDisplay({ song }: { song: Song }) {
+  const lyricLines: string[] = song.lyrics.split(/\n/);
+  return (
+    <div>
+      {/** biome-ignore lint/suspicious/noArrayIndexKey: index key is the only thing that makes sense here */}
+      {lyricLines.map((line, index) => <p key={index}>{line}</p>)}
     </div>
   );
 }
