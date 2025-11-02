@@ -19,7 +19,7 @@ export default function SongDisplay() {
     if (ask) await db.songs.clear();
   }
   return (
-    <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2">
+    <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Selected Songs</h1>
       {songData?.map((song) => <SongCard song={song} key={song.title} />)}
       {songData?.length === 0 && <div className="flex flex-col gap-2">

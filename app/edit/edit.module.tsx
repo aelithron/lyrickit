@@ -51,9 +51,9 @@ export default function EditLyrics() {
     <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
       <div className="flex flex-col text-center p-3 gap-2 md:col-span-2">
         {activeSong ? <form className="flex flex-col gap-2 p-2 items-center" onSubmit={handleSubmit}>
-          <p>{activeSong.title} - {(activeSong.artists || ["Unknown Artist"]).join()}</p>
+          <p className="text-lg font-semibold">{activeSong.title} - {(activeSong.artists || ["Unknown Artist"]).join()}</p>
           <MusicPlayer song={activeSong} />
-          <textarea className="bg-slate-500 rounded-md p-1 w-full" placeholder="Write lyrics here..." value={activeLyrics} onChange={changeLyrics} rows={6} />
+          <textarea className="bg-slate-500 border-3 border-slate-300 dark:border-slate-700 rounded-md p-1 w-full resize-none" placeholder="Write lyrics here..." value={activeLyrics} onChange={changeLyrics} rows={12} />
           <div className="flex gap-2 items-center">
             <button type="submit" className="bg-violet-300 rounded-lg text-black p-1"><FontAwesomeIcon icon={faSave} /> Save</button>
             <p className="bg-slate-500 rounded-lg p-1 text-sm">Status: {saved ? <FontAwesomeIcon icon={faCheck} /> : <FontAwesomeIcon icon={faSync} />}</p>
@@ -68,7 +68,7 @@ export default function EditLyrics() {
 
 function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
   return (
-    <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2">
+    <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Songs</h1>
       {songData?.map((song) => <button key={song.title} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
       {songData?.length === 0 && <div className="flex flex-col gap-2">
