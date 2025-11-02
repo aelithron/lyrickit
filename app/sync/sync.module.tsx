@@ -1,7 +1,7 @@
 "use client";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
@@ -43,26 +43,56 @@ function SongList({ songData, changeActive }: { songData: Song[] | undefined, ch
 }
 
 function LyricDisplay({ song }: { song: Song }) {
-  const [lyricLines, setLyricLines] = useState<string[]>(song.lyrics.split(/\n/));
+  const [lyricLines, setLyricLines] = useState<string[]>(() => song.lyrics.split(/\n/));
   const [cursorPosition, setPosition] = useState<number>(0);
-  async function syncLine() {
-    // using time placeholder until i add play-tracking :3
-    lyricLines[cursorPosition] = `[00:00.00] ${lyricLines[cursorPosition]}`;
-    setLyricLines(lyricLines);
-    setPosition(Math.min(cursorPosition + 1, lyricLines.length - 1));
-    song.lyrics = lyricLines.join("\n");
-    await db.songs.update(song.id, song);
-  }
-  // TODO: event listener for listening to space button and triggering syncLine
-  // TODO: listen to up and down arrows to change position
+  const cursorRef = useRef<number>(cursorPosition);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { cursorRef.current = cursorPosition }, [cursorPosition]);
+  useEffect(() => {
+    setLyricLines(song.lyrics.split(/\n/));
+    setPosition(0);
+  }, [song.lyrics]);
+  const syncLine = useCallback(async () => {
+    const pos = cursorRef.current;
+    const newLines = [...lyricLines];
+    if (!newLines[pos].match(/^\[\d{2}:\d{2}\.\d{2}\]/)) newLines[pos] = `[00:00.00] ${newLines[pos]}`; // using time placeholder until i add play-tracking :3
+    const updatedLyrics = newLines.join("\n");
+    await db.songs.update(song.id, { lyrics: updatedLyrics });
+    setLyricLines(newLines);
+    const nextPos = Math.min(pos + 1, newLines.length - 1);
+    setPosition(nextPos);
+  }, [song.id, lyricLines]);
+  useEffect(() => {
+    const handler = async (e: KeyboardEvent) => {
+      if (e.key === " ") {
+        e.preventDefault();
+        await syncLine();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setPosition((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1));
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lyricLines.length, syncLine]);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current.querySelector<HTMLElement>(`[data-index="${cursorPosition}"]`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [cursorPosition]);
   return (
     <div className="text-start mt-2 flex flex-col gap-2">
       <button type="button" onClick={syncLine} className="flex justify-center items-middle p-1 gap-2 sticky top-2 bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
-      {/** biome-ignore lint/suspicious/noArrayIndexKey: index key is the only thing that makes sense here */}
-      {lyricLines.map((line, index) => <div key={index}>
-        {index === cursorPosition && <FontAwesomeIcon className="mr-1" icon={faArrowRight} />}
-        {line}
-      </div>)}
+      <div ref={containerRef} className="overflow-y-auto">
+        {/** biome-ignore lint/suspicious/noArrayIndexKey: index-based key is the only thing that makes sense here */}
+        {lyricLines.map((line, index) => <div key={index} data-index={index}>
+          {index === cursorPosition && <FontAwesomeIcon className="mr-1" icon={faArrowRight} />}
+          {line}
+        </div>)}
+      </div>
     </div>
   );
 }
