@@ -25,7 +25,9 @@ export default function EditLyrics() {
     if (!activeSong) return;
     activeSong.lyrics = activeLyrics;
     setActiveSong(activeSong);
-    await db.songs.update(activeSong.id, activeSong);
+    let syncedStatus: boolean = activeLyrics.length >= 1;
+    for (const line of activeLyrics) if (!line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
+    await db.songs.update(activeSong.id, { lyrics: activeLyrics, lyricSource: "user", synced: syncedStatus });
   }
   function changeLyrics(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setActiveLyrics(e.target.value);
