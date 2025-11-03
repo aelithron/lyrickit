@@ -1,12 +1,16 @@
 "use client";
-import { useLiveQuery } from "dexie-react-hooks";
+// biome-ignore assist/source/organizeImports: idk how to sort these properly
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDown, faArrowRight, faArrowUp, faPlay, faSync } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { useEffect, useState, useRef, useCallback } from "react";
-import type { Song } from "@/lyrickit";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowDown, faArrowRight, faArrowUp, faSync } from "@fortawesome/free-solid-svg-icons";
+import type { Song } from "@/lyrickit";
+import { Space_Mono } from "next/font/google";
+
+const spaceMono = Space_Mono({ subsets: ["latin"], weight: "400" });
 
 export default function SyncLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
@@ -48,6 +52,7 @@ function SongList({ songData, changeActive }: { songData: Song[] | undefined, ch
 function LyricDisplay({ song }: { song: Song }) {
   const [lyricLines, setLyricLines] = useState<string[]>(() => song.lyrics.split(/\n/));
   const [cursorPosition, setPosition] = useState<number>(0);
+  const [time, setTime] = useState(0);
   const cursorRef = useRef<number>(cursorPosition);
   const containerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => { cursorRef.current = cursorPosition }, [cursorPosition]);
@@ -58,7 +63,9 @@ function LyricDisplay({ song }: { song: Song }) {
   const syncLine = useCallback(async () => {
     const pos = cursorRef.current;
     const newLines = [...lyricLines];
-    if (!newLines[pos].match(/^\[\d{2}:\d{2}\.\d{2}\]/)) newLines[pos] = `[00:00.00] ${newLines[pos]}`; // using time placeholder until i add play-tracking :3
+    if (newLines[pos].match(/^\[\d{2}:\d{2}\.\d{2}\]/)) {
+      newLines[pos] = `${lrcTimeFormatter(time)} ${newLines[pos].split(/^\[\d{2}:\d{2}\.\d{2}\]/)[1].trim()}`
+    } else newLines[pos] = `${lrcTimeFormatter(time)} ${newLines[pos]}`;
     const updatedLyrics = newLines.join("\n");
     let syncedStatus: boolean = newLines.length >= 1;
     for (const line of newLines) if (!line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
@@ -66,7 +73,7 @@ function LyricDisplay({ song }: { song: Song }) {
     setLyricLines(newLines);
     const nextPos = Math.min(pos + 1, newLines.length - 1);
     setPosition(nextPos);
-  }, [song.id, lyricLines]);
+  }, [song.id, lyricLines, time]);
   useEffect(() => {
     const handler = async (e: KeyboardEvent) => {
       if (e.key === " ") {
@@ -90,18 +97,107 @@ function LyricDisplay({ song }: { song: Song }) {
   }, [cursorPosition]);
   return (
     <div className="text-start mt-2 flex flex-col gap-2">
-      <div className="flex sticky top-4 justify-end gap-2">
-        <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
-        <button type="button" onClick={() => setPosition((prev) => Math.max(prev - 1, 0))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowUp} /></button>
-        <button type="button" onClick={() => setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowDown} /></button>
+      <div className="flex sticky top-4 justify-between">
+        <MusicSyncingPlayer song={song} onTimeChange={setTime} />
+        <div className="flex gap-2">
+          <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
+          <button type="button" onClick={() => setPosition((prev) => Math.max(prev - 1, 0))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowUp} /></button>
+          <button type="button" onClick={() => setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowDown} /></button>
+        </div>
       </div>
       <div ref={containerRef} className="overflow-y-auto">
         {/** biome-ignore lint/suspicious/noArrayIndexKey: index-based key is the only thing that makes sense here */}
-        {lyricLines.map((line, index) => <div key={index} data-index={index}>
-          {index === cursorPosition && <FontAwesomeIcon className="mr-1" icon={faArrowRight} />}
+        {lyricLines.map((line, index) => <div key={index} data-index={index} className="flex">
+          <div className="w-32">
+            {index === cursorPosition && <div className="flex items-center">
+              <p className={spaceMono.className}>{lrcTimeFormatter(time)}</p>
+              <FontAwesomeIcon className="mx-1" icon={faArrowRight} />
+            </div>}
+          </div>
           {line}
         </div>)}
       </div>
     </div>
   );
+}
+
+function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeChange: Dispatch<SetStateAction<number>> }) {
+  const [songFile, setSongFile] = useState<File | null>(null);
+  const [url, setUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    if (songFile) {
+      objectUrl = URL.createObjectURL(songFile);
+      setUrl(objectUrl);
+    } else {
+      setUrl(null);
+    }
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [songFile]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: this is the only way i can figure out making the music player reload on song change
+  useEffect(() => setSongFile(null), [song.id]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only way to make this change when song is selected
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    let frame: number;
+    const update = () => {
+      if (!audio.paused) onTimeChange(audio.currentTime);
+      frame = requestAnimationFrame(update);
+    };
+    frame = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frame);
+  }, [songFile, onTimeChange]);
+  async function loadSong() {
+    if (song.audioHandle) {
+      try {
+        const file = await song.audioHandle.getFile();
+        if (song.fileID !== `${file.name}-${file.size}-${file.lastModified}`) {
+          const value = confirm(`The file you selected, "${file.name}", doesn't match the one you originally selected! Still import it?`);
+          if (!value) return;
+        }
+        setSongFile(file);
+        return;
+      } catch { }
+    }
+    try {
+      // @ts-expect-error - api exists despite not having a type :3
+      const handles: FileSystemFileHandle[] = await window.showOpenFilePicker({
+        multiple: false,
+        types: [{
+          description: `Song file (for "${song.title}"${song.artists && ` - ${(song.artists || ["Unknown Artist"]).join()}`})`,
+          accept: { "audio/*": [".flac", ".mp3", ".ogg", ".aac", ".m4a", ".wav"] }
+        }]
+      });
+      if (!handles || !handles[0]) return;
+      const file = await handles[0].getFile();
+      if (song.fileID !== `${file.name}-${file.size}-${file.lastModified}`) {
+        const value = confirm(`The file you selected, "${file.name}", doesn't match the one you originally selected! Still import it?`);
+        if (!value) return;
+      }
+      song.audioHandle = handles[0];
+      await db.songs.update(song.id, song);
+      setSongFile(file);
+    } catch (err) {
+      if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
+        alert("File selection doesn't work with your browser! Try using this site with Chrome (or something based on it).");
+        return;
+      }
+      if ((err as DOMException).name !== "AbortError") console.error(err);
+    }
+  }
+  return (
+    <div>
+      {!songFile && <button type="button" onClick={loadSong} className="bg-violet-300 rounded-lg p-1 text-black"><FontAwesomeIcon icon={faPlay} /> Start</button>}
+      {/** biome-ignore lint/a11y/useMediaCaption: content is variable, can't caption beforehand! */}
+      {songFile && <audio ref={audioRef} src={url || undefined} controls={true} autoPlay={true} />}
+    </div>
+  );
+}
+function lrcTimeFormatter(time: number) {
+  const mm = String(Math.floor(time / 60)).padStart(2, "0");
+  const ss = String(Math.floor(time % 60)).padStart(2, "0");
+  const xx = String(Math.floor((time - Math.floor(time)) * 100)).padStart(2, "0");
+  return `[${mm}:${ss}.${xx}]`;
 }
