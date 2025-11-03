@@ -98,7 +98,7 @@ function LyricDisplay({ song }: { song: Song }) {
   }, [cursorPosition]);
   return (
     <div className="text-start mt-2 flex flex-col gap-2">
-      <div className="flex sticky top-4 justify-between">
+      <div className="flex flex-col md:flex-row gap-2 sticky top-4 justify-center md:justify-between">
         <MusicSyncingPlayer song={song} onTimeChange={setTime} />
         <div className="flex gap-2">
           <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
@@ -180,7 +180,7 @@ export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeC
       await db.songs.update(song.id, song);
       setSongFile(file);
     } catch (err) {
-      if ((err as DOMException).name !== "AbortError") console.error(err);
+      if ((err as DOMException).message !== "The user aborted a request.") console.error(err);
     }
   }
   return (

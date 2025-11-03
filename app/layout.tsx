@@ -25,7 +25,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${montserrat.className} antialiased`}>
         <Sidebar />
-        <main className="flex-1 ml-10">
+        <main className="flex-1 ml-20 md:ml-10">
           {children}
         </main>
       </body>

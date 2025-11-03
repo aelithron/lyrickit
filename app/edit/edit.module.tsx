@@ -4,10 +4,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { showOpenFilePicker } from "show-open-file-picker";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
-import { showOpenFilePicker } from "show-open-file-picker";
 
 export default function EditLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
@@ -130,7 +130,7 @@ function MusicPlayer({ song }: { song: Song }) {
       await db.songs.update(song.id, song);
       setSongFile(file);
     } catch (err) {
-      if ((err as DOMException).name !== "AbortError") console.error(err);
+      if ((err as DOMException).message !== "The user aborted a request.") console.error(err);
     }
   }
   return (
