@@ -1,6 +1,6 @@
 "use client";
 import { useLiveQuery } from "dexie-react-hooks";
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
 import Image from "next/image";
 import { Lrc, type LrcLine } from "react-lrc";
 import defaultCover from "@/public/defaultCover.jpeg";
@@ -16,14 +16,10 @@ export default function PreviewSong() {
   const [time, setTime] = useState(0);
   return (
     <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
-      {activeSong ?
-        <SongDisplay song={activeSong} changeActive={setActiveSong} setTime={setTime} /> :
-        <SongList songData={songData} changeActive={(song) => setActiveSong(song)} />
-      }
+      <div className={activeSong ? "hidden absolute" : ""}><SongList songData={songData} changeActive={(song) => setActiveSong(song)} /></div>
+      {activeSong && <SongDisplay song={activeSong} changeActive={setActiveSong} setTime={setTime} />}
       <div className="flex flex-col text-center p-3 gap-2 md:col-span-2">
-        {activeSong ? <PreviewLines song={activeSong} time={time} /> : <div className="bg-slate-500 rounded-md p-1 w-full">
-          <p>Select a song to preview!</p>
-        </div>}
+        {activeSong ? <PreviewLines song={activeSong} time={time} /> : <p className="bg-slate-500 rounded-md p-1 w-full">Select a song to preview!</p>}
       </div>
     </div>
   );
@@ -50,9 +46,6 @@ function PreviewLines({ song, time }: { song: Song, time: number }) {
 
 function SongDisplay({ song, changeActive, setTime }: { song: Song, changeActive: Dispatch<SetStateAction<Song | null>>, setTime: Dispatch<SetStateAction<number>> }) {
   const url = song.cover ? URL.createObjectURL(song.cover) : null;
-  useEffect(() => {
-    return () => { if (url) URL.revokeObjectURL(url); };
-  }, [url]);
   function closeDisplay() {
     changeActive(null);
     setTime(0);

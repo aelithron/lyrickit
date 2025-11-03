@@ -44,6 +44,9 @@ importers:
       react-lrc:
         specifier: ^3.2.1
         version: 3.2.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      show-open-file-picker:
+        specifier: ^0.4.0
+        version: 0.4.0
     devDependencies:
       '@biomejs/biome':
         specifier: 2.2.0
@@ -675,6 +678,9 @@ packages:
     resolution: {integrity: sha512-FUH39xp3SBPnxWvd5iib1X8XY7J0K0X7d93sie9CJg2PO8/7gmg89Nve6OjItK53/MlAushNNxteBYfM6DEuoA==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
 
+  show-open-file-picker@0.4.0:
+    resolution: {integrity: sha512-To0PwbPwZOJWTkl19PwCl//Dk912xoEohCJ4Gac001MyhqoR2xSJsRh9+37Aq7u6pNvTslg0Kx9TzhkZVxRUaA==}
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -1228,6 +1234,8 @@ snapshots:
       '@img/sharp-win32-ia32': 0.34.4
       '@img/sharp-win32-x64': 0.34.4
     optional: true
+
+  show-open-file-picker@0.4.0: {}
 
   source-map-js@1.2.1: {}
 

@@ -9,6 +9,7 @@ import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
 import type { Song } from "@/lyrickit";
 import { Space_Mono } from "next/font/google";
+import { showOpenFilePicker } from "show-open-file-picker";
 
 const spaceMono = Space_Mono({ subsets: ["latin"], weight: "400" });
 
@@ -162,8 +163,7 @@ export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeC
       } catch { }
     }
     try {
-      // @ts-expect-error - api exists despite not having a type :3
-      const handles: FileSystemFileHandle[] = await window.showOpenFilePicker({
+      const handles: FileSystemFileHandle[] = await showOpenFilePicker({
         multiple: false,
         types: [{
           description: `Song file (for "${song.title}"${song.artists && ` - ${(song.artists || ["Unknown Artist"]).join()}`})`,
@@ -180,10 +180,6 @@ export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeC
       await db.songs.update(song.id, song);
       setSongFile(file);
     } catch (err) {
-      if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
-        alert("File selection doesn't work with your browser! Try using this site with Chrome (or something based on it).");
-        return;
-      }
       if ((err as DOMException).name !== "AbortError") console.error(err);
     }
   }

@@ -1,13 +1,13 @@
 "use client";
 import { parseBlob } from "music-metadata";
+import { showOpenFilePicker } from "show-open-file-picker";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 
 export function UploadSongs() {
   async function processFiles() {
     try {
-      // @ts-expect-error - api exists despite not having a type :3
-      const handles: FileSystemFileHandle[] = await window.showOpenFilePicker({
+      const handles: FileSystemFileHandle[] = await showOpenFilePicker({
         multiple: true,
         types: [{
           description: "Song files",
@@ -39,10 +39,6 @@ export function UploadSongs() {
       }
       await db.songs.bulkAdd(newSongs);
     } catch (err) {
-      if ((err as TypeError).message === "window.showOpenFilePicker is not a function") {
-        alert("File selection doesn't work with your browser! Try using this site with Chrome (or something based on it).");
-        return;
-      }
       if ((err as DOMException).name !== "AbortError") console.error(err);
     }
   }
