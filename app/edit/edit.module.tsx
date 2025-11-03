@@ -43,7 +43,9 @@ export default function EditLyrics() {
       if (!activeSong) return;
       activeSong.lyrics = activeLyrics;
       setActiveSong(activeSong);
-      db.songs.update(activeSong.id, activeSong);
+      let syncedStatus: boolean = activeLyrics.length >= 1;
+      for (const line of activeLyrics) if (!line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
+      db.songs.update(activeSong.id, { lyrics: activeLyrics, lyricSource: "user", synced: syncedStatus });
       setSaved(true);
     }, 750);
     return () => clearTimeout(timeout);

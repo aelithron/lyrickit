@@ -6,7 +6,7 @@ import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight, faSync } from "@fortawesome/free-solid-svg-icons";
+import { faArrowDown, faArrowRight, faArrowUp, faSync } from "@fortawesome/free-solid-svg-icons";
 
 export default function SyncLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
@@ -17,7 +17,10 @@ export default function SyncLyrics() {
         {activeSong ? <div>
           <p className="text-lg font-semibold">{activeSong.title} - {(activeSong.artists || ["Unknown Artist"]).join()}</p>
           <LyricDisplay song={activeSong} />
-        </div> : <p className="bg-slate-500 rounded-md p-1 w-full">Select a song from the menu to sync the lyrics!</p>}
+        </div> : <div className="bg-slate-500 rounded-md p-1 w-full">
+          <p>Select a song from the menu to sync the lyrics!</p>
+          <p>Tip: You can use the arrows and spacebar to sync on desktop.</p>
+        </div>}
       </div>
       <SongList songData={songData} changeActive={(song) => setActiveSong(song)} />
     </div>
@@ -87,7 +90,11 @@ function LyricDisplay({ song }: { song: Song }) {
   }, [cursorPosition]);
   return (
     <div className="text-start mt-2 flex flex-col gap-2">
-      <button type="button" onClick={syncLine} className="flex justify-center items-middle p-1 gap-2 sticky top-2 bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
+      <div className="flex sticky top-4 justify-end gap-2">
+        <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
+        <button type="button" onClick={() => setPosition((prev) => Math.max(prev - 1, 0))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowUp} /></button>
+        <button type="button" onClick={() => setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowDown} /></button>
+      </div>
       <div ref={containerRef} className="overflow-y-auto">
         {/** biome-ignore lint/suspicious/noArrayIndexKey: index-based key is the only thing that makes sense here */}
         {lyricLines.map((line, index) => <div key={index} data-index={index}>
