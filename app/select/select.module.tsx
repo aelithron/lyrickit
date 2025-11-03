@@ -39,7 +39,7 @@ export function UploadSongs() {
       }
       await db.songs.bulkAdd(newSongs);
     } catch (err) {
-      if ((err as DOMException).message !== "The user aborted a request.") console.error(err);
+      if (!(err as DOMException).message.includes("The user aborted a request.")) console.error(err);
     }
   }
   return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2">Select Songs</button>

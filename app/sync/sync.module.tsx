@@ -3,7 +3,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowDown, faArrowRight, faArrowUp, faPlay, faSync } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState, memo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
@@ -32,12 +32,12 @@ export default function SyncLyrics() {
   );
 }
 
-export function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
+export const SongList = memo(function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
   const syncedData = songData?.filter((songItem) => songItem.lyrics !== "");
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Songs with Lyrics</h1>
-      {syncedData?.map((song) => <button key={song.title} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
+  {syncedData?.map((song) => <button key={song.id} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
       {syncedData?.length === 0 && <div className="flex flex-col gap-2">
         <p>You don't have any songs with lyrics yet!</p>
         <div className="flex gap-2 justify-center">
@@ -48,7 +48,7 @@ export function SongList({ songData, changeActive }: { songData: Song[] | undefi
       {songData === undefined && <p>Loading songs...</p>}
     </div>
   );
-}
+});
 
 function LyricDisplay({ song }: { song: Song }) {
   const [lyricLines, setLyricLines] = useState<string[]>(() => song.lyrics.split(/\n/));
@@ -180,7 +180,7 @@ export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeC
       await db.songs.update(song.id, song);
       setSongFile(file);
     } catch (err) {
-      if ((err as DOMException).message !== "The user aborted a request.") console.error(err);
+      if (!(err as DOMException).message.includes("The user aborted a request.")) console.error(err);
     }
   }
   return (

@@ -130,7 +130,7 @@ function MusicPlayer({ song }: { song: Song }) {
       await db.songs.update(song.id, song);
       setSongFile(file);
     } catch (err) {
-      if ((err as DOMException).message !== "The user aborted a request.") console.error(err);
+      if (!(err as DOMException).message.includes("The user aborted a request.")) console.error(err);
     }
   }
   return (
