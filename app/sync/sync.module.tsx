@@ -31,7 +31,7 @@ export default function SyncLyrics() {
   );
 }
 
-function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
+export function SongList({ songData, changeActive }: { songData: Song[] | undefined, changeActive: (song: Song) => void }) {
   const syncedData = songData?.filter((songItem) => songItem.lyrics !== "");
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
@@ -121,7 +121,7 @@ function LyricDisplay({ song }: { song: Song }) {
   );
 }
 
-function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeChange: Dispatch<SetStateAction<number>> }) {
+export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeChange: Dispatch<SetStateAction<number>> }) {
   const [songFile, setSongFile] = useState<File | null>(null);
   const [url, setUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
