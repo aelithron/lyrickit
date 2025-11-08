@@ -34,6 +34,7 @@ export function UploadSongs() {
           lyrics: "",
           synced: false,
           audioHandle: handle,
+          lyricFileName: `${file.name.split( /\.[^/.]+$/)[0]}.lrc`,
           fileID: `${file.name}-${file.size}-${file.lastModified}`
         });
       }
