@@ -7,8 +7,6 @@ import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
 
-
-
 export default function ExportLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
   function downloadLRC(song: Song) {
@@ -35,7 +33,7 @@ export default function ExportLyrics() {
   }
   return (
     <div className="flex flex-col gap-2">
-      <button type="button" className="text-lg mt-2 p-1 px-2 bg-violet-300 text-black rounded-lg w-fit" onClick={() => downloadAllLRCs()}><FontAwesomeIcon icon={faDownload} /> Download All</button>
+      <button type="button" className="text-lg mt-2 p-1 px-2 bg-violet-300 text-black rounded-lg w-fit hover:text-sky-500" onClick={() => downloadAllLRCs()}><FontAwesomeIcon icon={faDownload} /> Download All</button>
       <div className="grid grid-cols-1 md:grid-cols-3 mt-6 gap-4">
         {songData?.map((song) => <div className="flex bg-slate-500 p-2 rounded-lg justify-between" key={song.id}>
           <SongCard song={song} />

@@ -27,7 +27,7 @@ export default function SongDisplay() {
         {pathname !== "/select" && <Link href={"/select"} className="p-2 rounded-lg bg-violet-300 text-black">Pick Songs</Link>}
       </div>}
       {songData === undefined && <p>Loading songs...</p>}
-      {(songData && songData.length >= 1 && pathname === "/select") && <button type="button" className="bg-red-300 text-black p-2 rounded-lg" onClick={clearSongs}>
+      {(songData && songData.length >= 1 && pathname === "/select") && <button type="button" className="bg-red-300 text-black p-2 rounded-lg hover:text-sky-500" onClick={clearSongs}>
         <FontAwesomeIcon icon={faTrash} /> Clear all Songs
       </button>}
     </div>
@@ -50,7 +50,7 @@ export function SongCard({ song }: { song: Song }) {
         </div>
         <div className="flex gap-2">
           <p className="text-lg font-semibold">{song.title}</p>
-          {pathname === "/select" && <button type="button" onClick={async () => (await db.songs.delete(song.id))}><FontAwesomeIcon icon={faTrash} /></button>}
+          {pathname === "/select" && <button type="button" className="hover:text-sky-500" onClick={async () => (await db.songs.delete(song.id))}><FontAwesomeIcon icon={faTrash} /></button>}
         </div>
         <p>by {(song.artists || ["Unknown Artist"]).join()}</p>
         <p>on {song.album || "Unknown Album"}</p>

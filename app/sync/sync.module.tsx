@@ -101,9 +101,9 @@ function LyricDisplay({ song }: { song: Song }) {
       <div className="flex flex-col md:flex-row gap-2 sticky top-4 justify-center md:justify-between">
         <MusicSyncingPlayer song={song} onTimeChange={setTime} />
         <div className="flex gap-2">
-          <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faSync} /> Sync</button>
-          <button type="button" onClick={() => setPosition((prev) => Math.max(prev - 1, 0))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowUp} /></button>
-          <button type="button" onClick={() => setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1))} className="p-1 text-lg bg-violet-300 text-black rounded-lg"><FontAwesomeIcon icon={faArrowDown} /></button>
+          <button type="button" onClick={syncLine} className="p-1 gap-2 text-lg bg-violet-300 text-black rounded-lg hover:text-sky-500"><FontAwesomeIcon icon={faSync} /> Sync</button>
+          <button type="button" onClick={() => setPosition((prev) => Math.max(prev - 1, 0))} className="p-1 text-lg bg-violet-300 text-black rounded-lg hover:text-sky-500"><FontAwesomeIcon icon={faArrowUp} /></button>
+          <button type="button" onClick={() => setPosition((prev) => Math.min(prev + 1, lyricLines.length - 1))} className="p-1 text-lg bg-violet-300 text-black rounded-lg hover:text-sky-500"><FontAwesomeIcon icon={faArrowDown} /></button>
         </div>
       </div>
       <div ref={containerRef} className="overflow-y-auto">
@@ -185,7 +185,7 @@ export function MusicSyncingPlayer({ song, onTimeChange }: { song: Song, onTimeC
   }
   return (
     <div>
-      {!songFile && <button type="button" onClick={loadSong} className="bg-violet-300 rounded-lg p-1 text-black"><FontAwesomeIcon icon={faPlay} /> Start</button>}
+      {!songFile && <button type="button" onClick={loadSong} className="bg-violet-300 rounded-lg p-1 text-black hover:text-sky-500"><FontAwesomeIcon icon={faPlay} /> Start</button>}
       {/** biome-ignore lint/a11y/useMediaCaption: content is variable, can't caption beforehand! */}
       {songFile && <audio ref={audioRef} src={url || undefined} controls={true} autoPlay={true} />}
     </div>

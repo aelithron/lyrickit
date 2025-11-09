@@ -43,5 +43,5 @@ export function UploadSongs() {
       if (!(err as DOMException).message.includes("The user aborted a request.")) console.error(err);
     }
   }
-  return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2">Select Songs</button>
+  return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2 hover:text-sky-500">Select Songs</button>
 }
