@@ -37,7 +37,7 @@ export const SongList = memo(function SongList({ songData, changeActive }: { son
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Songs with Lyrics</h1>
-  {syncedData?.map((song) => <button key={song.id} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
+      {syncedData?.map((song) => <button key={song.id} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
       {syncedData?.length === 0 && <div className="flex flex-col gap-2">
         <p>You don't have any songs with lyrics yet!</p>
         <div className="flex gap-2 justify-center">
