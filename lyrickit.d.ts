@@ -4,10 +4,11 @@ export type Song = {
   album?: string;
   artists?: string[];
   cover: Blob | null;
-  lyricSource: "lrclib" | "genius" | "musixmatch" | "user" | null
+  fromUser: boolean;
   lyrics: string;
   synced: boolean;
   audioHandle: FileSystemFileHandle | null;
   lyricFileName: string;
+  duration: number;
   fileID: string | null;
 };

@@ -70,7 +70,7 @@ function LyricDisplay({ song }: { song: Song }) {
     const updatedLyrics = newLines.join("\n");
     let syncedStatus: boolean = newLines.length >= 1;
     for (const line of newLines) if (!line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
-    await db.songs.update(song.id, { lyrics: updatedLyrics, lyricSource: "user", synced: syncedStatus });
+    await db.songs.update(song.id, { lyrics: updatedLyrics, fromUser: true, synced: syncedStatus });
     setLyricLines(newLines);
     const nextPos = Math.min(pos + 1, newLines.length - 1);
     setPosition(nextPos);

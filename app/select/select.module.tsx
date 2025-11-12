@@ -30,11 +30,12 @@ export function UploadSongs() {
           album: metadata.common.album,
           artists: metadata.common.artists,
           cover: coverBlob,
-          lyricSource: null,
+          fromUser: true,
           lyrics: "",
           synced: false,
           audioHandle: handle,
           lyricFileName: `${file.name.split( /\.[^/.]+$/)[0]}.lrc`,
+          duration: metadata.format.duration || 0,
           fileID: `${file.name}-${file.size}-${file.lastModified}`
         });
       }

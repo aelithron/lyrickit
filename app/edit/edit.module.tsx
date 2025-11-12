@@ -28,7 +28,7 @@ export default function EditLyrics() {
     setActiveSong(activeSong);
     let syncedStatus: boolean = activeLyrics.length >= 1;
     for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
-    await db.songs.update(activeSong.id, { lyrics: activeLyrics, lyricSource: "user", synced: syncedStatus });
+    await db.songs.update(activeSong.id, { lyrics: activeLyrics, fromUser: true, synced: syncedStatus });
   }
   function changeLyrics(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setActiveLyrics(e.target.value);
@@ -46,7 +46,7 @@ export default function EditLyrics() {
       setActiveSong(activeSong);
       let syncedStatus: boolean = activeLyrics.length >= 1;
       for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
-      db.songs.update(activeSong.id, { lyrics: activeLyrics, lyricSource: "user", synced: syncedStatus });
+      db.songs.update(activeSong.id, { lyrics: activeLyrics, fromUser: true, synced: syncedStatus });
       setSaved(true);
     }, 750);
     return () => clearTimeout(timeout);
