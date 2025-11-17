@@ -1,7 +1,19 @@
 import type { Song } from "@/lyrickit";
 
-export async function lrcLibFetch(song: Song) {
+export type LyricSearchResult = {
+  synced: boolean;
+  lyrics: string;
+  provider: "lrclib" | "genius";
+}
+
+export async function lrcLibFetch(song: Song): Promise<LyricSearchResult[]> {
   // note: am using undefined because i've seen it on lrclib before
-  const result = await fetch(`https://lrclib.net/api/get?track-name=${song.title.replaceAll(" ", "+")}&album-name=${(song.artists || ["undefined"]).join(" ").replaceAll(" ", "+")}&album-name=${(song.album || "undefined").replaceAll(" ", "+")}&duration=${song.duration}`);
-  console.log(await result.json());
+  const res = await fetch(`https://lrclib.net/api/get?track_name=${song.title.replaceAll(" ", "+")}&artist_name=${(song.artists || ["undefined"]).join(" ").replaceAll(" ", "+")}&album_name=${(song.album || "undefined").replaceAll(" ", "+")}&duration=${song.duration}`);
+  if (!res.ok) return [];
+  const lyricJSON = await res.json();
+  if (lyricJSON.instrumental as boolean) return [];
+  const results: LyricSearchResult[] = [];
+  if (lyricJSON.syncedLyrics) results.push({ synced: true, lyrics: lyricJSON.syncedLyrics as string, provider: "lrclib" });
+  if (lyricJSON.plainLyrics) results.push({ synced: false, lyrics: lyricJSON.plainLyrics as string, provider: "lrclib" });
+  return results;
 }
