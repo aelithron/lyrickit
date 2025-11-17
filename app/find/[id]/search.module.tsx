@@ -50,6 +50,10 @@ export default function LyricSearch({ id }: { id: string }) {
         <SongCard song={songData} />
         {searchResults.map((result) => <div key={`${result.provider}-${result.synced}`}><ResultCard result={result} callback={() => selectLyrics(Number.parseInt(id, 10), result)} /></div>)}
         {loading && <p>Loading lyrics... (this may take a bit!)</p>}
+        {(!loading && searchResults.length === 0) && <div>
+          <p>No lyrics were found for this song!</p>
+          <Link href={"/find"} className="bg-violet-300 text-black p-1 rounded-lg text-lg w-fit"><FontAwesomeIcon icon={faArrowLeft} /> Go Back</Link>
+        </div>}
       </div>}
     </div>
   );
@@ -58,11 +62,11 @@ export default function LyricSearch({ id }: { id: string }) {
 function ResultCard({ result, callback }: { result: LyricSearchResult, callback: () => Promise<void> }) {
   const [open, setOpen] = useState<boolean>(false);
   return (
-    <div className="gap-1 bg-slate-500 rounded-lg p-2 flex flex-col">
-      <div className="flex justify-between items-center">
+    <div className="gap-2 bg-slate-500 rounded-lg w-11/12 p-2 flex flex-col">
+      <div className="flex justify-between items-center gap-4">
         <div className="flex gap-1">
           {result.provider === "lrclib" && <p>LRCLIB</p>}
-          {result.provider === "genius" && <p>Genius</p>}
+          {/* result.provider === "genius" && <p>Genius</p> */}
           <p>-</p>
           {result.synced ? <p>Synced</p> : <p>Plain</p>}
         </div>

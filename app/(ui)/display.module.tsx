@@ -21,7 +21,7 @@ export default function SongDisplay() {
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Selected Songs</h1>
-      {songData?.map((song) => <SongCard song={song} key={song.title} />)}
+      {songData?.map((song) => <SongCard song={song} key={song.id} />)}
       {songData?.length === 0 && <div className="flex flex-col gap-2">
         <p>You haven't added any songs yet!</p>  
         {pathname !== "/select" && <Link href={"/select"} className="p-2 rounded-lg bg-violet-300 text-black">Pick Songs</Link>}

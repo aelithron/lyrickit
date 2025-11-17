@@ -3,7 +3,7 @@ import type { Song } from "@/lyrickit";
 export type LyricSearchResult = {
   synced: boolean;
   lyrics: string;
-  provider: "lrclib" | "genius";
+  provider: "lrclib"; // add genius when it is ready
 }
 
 export async function lrcLibFetch(song: Song): Promise<LyricSearchResult[]> {

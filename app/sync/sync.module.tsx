@@ -64,8 +64,8 @@ function LyricDisplay({ song }: { song: Song }) {
   const syncLine = useCallback(async () => {
     const pos = cursorRef.current;
     const newLines = [...lyricLines];
-    if (newLines[pos].match(/^\[\d{2}:\d{2}\.\d{2}\]/)) {
-      newLines[pos] = `${lrcTimeFormatter(time)} ${newLines[pos].split(/^\[\d{2}:\d{2}\.\d{2}\]/)[1].trim()}`
+    if (newLines[pos].match(/^\[\d{2}:\d{2}\.\d{2,3}\]/)) {
+      newLines[pos] = `${lrcTimeFormatter(time)} ${newLines[pos].split(/^\[\d{2}:\d{2}\.\d{2,3}\]/)[1].trim()}`
     } else newLines[pos] = `${lrcTimeFormatter(time)} ${newLines[pos]}`;
     const updatedLyrics = newLines.join("\n");
     let syncedStatus: boolean = newLines.length >= 1;

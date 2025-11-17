@@ -14,8 +14,8 @@ export default function PreviewSong() {
   return (
     <div className="grid grid-rows-3 grid-cols-1 md:grid-cols-3 md:grid-rows-1 mt-6 gap-4">
       <div className="flex flex-col gap-2">
-        <SongList songData={songData} changeActive={changeActive} />
         {activeSong && <SongDisplay song={activeSong} setTime={setTime} />}
+        <SongList songData={songData} changeActive={changeActive} />
       </div>
       <div className="flex flex-col text-center p-3 gap-2 md:col-span-2">
         {activeSong ? <PreviewLines song={activeSong} time={time} /> : <p className="bg-slate-500 rounded-md p-1 w-full">Select a song to preview!</p>}

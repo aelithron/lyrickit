@@ -1,5 +1,5 @@
 "use client";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLiveQuery } from "dexie-react-hooks";
 import JSZip from "jszip";
@@ -33,13 +33,20 @@ export default function ExportLyrics() {
     link.parentNode?.removeChild(link);
     URL.revokeObjectURL(url);
   }
+  function copyLRC(song: Song) {
+    navigator.clipboard.writeText(song.lyrics);
+    alert(`Copied lyrics for ${song.title} - ${(song.artists || ["Unknown Artist"]).join()}.`)
+  }
   return (
     <div className="flex flex-col gap-2">
       <button type="button" className="text-lg mt-2 p-1 px-2 bg-violet-300 text-black rounded-lg w-fit hover:text-sky-500" onClick={() => downloadAllLRCs()}><FontAwesomeIcon icon={faDownload} /> Download All</button>
       <div className="grid grid-cols-1 md:grid-cols-3 mt-6 gap-4">
         {lyricSongs?.map((song) => <div className="flex bg-slate-500 p-2 rounded-lg justify-between" key={song.id}>
           <SongCard song={song} />
-          <button type="button" className="hover:text-sky-500" onClick={() => downloadLRC(song)}><FontAwesomeIcon icon={faDownload} size="xl" /></button>
+            <div className="flex flex-col gap-2 items-center justify-center">
+            <button type="button" className="hover:text-sky-500" onClick={() => downloadLRC(song)}><FontAwesomeIcon icon={faDownload} size="xl" /></button>
+            <button type="button" className="hover:text-sky-500" onClick={() => copyLRC(song)}><FontAwesomeIcon icon={faCopy} size="xl" /></button>
+          </div>
         </div>)}
         {lyricSongs?.length === 0 && <div className="flex flex-col gap-2">
           <p>You don't have any songs with lyrics yet!</p>

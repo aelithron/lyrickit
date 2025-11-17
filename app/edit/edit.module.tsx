@@ -27,7 +27,7 @@ export default function EditLyrics() {
     activeSong.lyrics = activeLyrics;
     setActiveSong(activeSong);
     let syncedStatus: boolean = activeLyrics.length >= 1;
-    for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
+    for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2,3}\]/)) syncedStatus = false;
     await db.songs.update(activeSong.id, { lyrics: activeLyrics, fromUser: true, synced: syncedStatus });
   }
   function changeLyrics(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -45,7 +45,7 @@ export default function EditLyrics() {
       activeSong.lyrics = activeLyrics;
       setActiveSong(activeSong);
       let syncedStatus: boolean = activeLyrics.length >= 1;
-      for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2}\]/)) syncedStatus = false;
+      for (const line of activeLyrics.split('\n')) if (line && !line.match(/^\[\d{2}:\d{2}\.\d{2,3}\]/)) syncedStatus = false;
       db.songs.update(activeSong.id, { lyrics: activeLyrics, fromUser: true, synced: syncedStatus });
       setSaved(true);
     }, 750);
@@ -75,7 +75,7 @@ function SongList({ songData, changeActive }: { songData: Song[] | undefined, ch
   return (
     <div className="flex flex-col bg-slate-500 rounded-lg text-center p-3 gap-2 h-min">
       <h1 className="text-xl font-semibold mb-2">Songs</h1>
-      {songData?.map((song) => <button key={song.title} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
+      {songData?.map((song) => <button key={song.id} type="button" onClick={() => changeActive(song)}><SongCard song={song} /></button>)}
       {songData?.length === 0 && <div className="flex flex-col gap-2">
         <p>You haven't added any songs yet!</p>
         <Link href={"/select"} className="p-2 rounded-lg bg-violet-300 text-black">Pick Songs</Link>
