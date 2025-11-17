@@ -14,4 +14,26 @@ This was made for Hack Club's [Midnight](https://midnight.hackclub.com), a murde
 ## Using
 Go to [lyrics.novatea.dev](https://lyrics.novatea.dev) in a web browser! Upload your songs and follow the flow illustrated by the sidebar (it goes in order).
 ### Self-hosting
-Instructions coming soon!
+#### With Docker Compose
+Copy the following Compose file to your server or computer, and name it `compose.yaml`:
+```yaml
+services:
+  lyrickit:
+    image: ghcr.io/aelithron/lyrickit:latest
+    container_name: lyrickit
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+```
+Then, simply run `docker compose up -d` in the directory of the file!
+#### With `docker run`
+Run the following command on your server or computer:
+```bash
+docker run -d \
+  --name lyrickit \
+  -p 3000:3000 \
+  --restart unless-stopped \
+  ghcr.io/aelithron/lyrickit:latest
+```
+## Credits
+This project uses some [Font Awesome](https://fontawesome.com) and [Twemoji](https://github.com/twitter/twemoji) icons throughout.

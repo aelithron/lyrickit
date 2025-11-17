@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import LyricSearch from "./search.module";
+
+export const metadata: Metadata = {
+  title: "Finding..."
+};
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
