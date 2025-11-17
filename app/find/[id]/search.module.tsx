@@ -13,6 +13,7 @@ export default function LyricSearch({ id }: { id: string }) {
   const router = useRouter();
   const [songData, setSongData] = useState<Song | null | false>(null);
   const [searchResults, setResults] = useState<LyricSearchResult[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   async function loadSong(id: string) {
     const song = await db.songs.get(Number.parseInt(id, 10));
     if (!song) {
@@ -20,12 +21,21 @@ export default function LyricSearch({ id }: { id: string }) {
       return;
     }
     setSongData(song);
-    const newResults = await lrcLibFetch(song);
-    setResults(prev => [...prev, ...(newResults)]);
+    const newResults: LyricSearchResult[] = [];
+    newResults.push(...await lrcLibFetch(song));
+    // todo: add Genius provider
+    setResults(newResults);
+    setLoading(false);
   }
   async function selectLyrics(id: number, result: LyricSearchResult) {
-    db.songs.update(id, { lyrics: result.lyrics, synced: result.synced, fromUser: false });
-    router.push("/find");
+    let ok = false;
+    if ((songData as Song).lyrics !== "") {
+      ok = confirm("This song already has lyrics, overwrite them?");
+    } else ok = true;
+    if (ok) {
+      db.songs.update(id, { lyrics: result.lyrics, synced: result.synced, fromUser: false });
+      router.push("/find");
+    }
   }
   // biome-ignore lint/correctness/useExhaustiveDependencies: only method that makes sense here
   useEffect(() => { loadSong(id) }, [id]);
@@ -39,6 +49,7 @@ export default function LyricSearch({ id }: { id: string }) {
       {songData && <div className="flex flex-col gap-2">
         <SongCard song={songData} />
         {searchResults.map((result) => <div key={`${result.provider}-${result.synced}`}><ResultCard result={result} callback={() => selectLyrics(Number.parseInt(id, 10), result)} /></div>)}
+        {loading && <p>Loading lyrics... (this may take a bit!)</p>}
       </div>}
     </div>
   );

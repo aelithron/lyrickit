@@ -17,3 +17,5 @@ export async function lrcLibFetch(song: Song): Promise<LyricSearchResult[]> {
   if (lyricJSON.plainLyrics) results.push({ synced: false, lyrics: lyricJSON.plainLyrics as string, provider: "lrclib" });
   return results;
 }
+
+// todo: add Genius provider
