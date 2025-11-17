@@ -6,8 +6,7 @@ This was made for Hack Club's [Midnight](https://midnight.hackclub.com), a murde
 
 ## Features
 - Metadata extractor for uploaded song files
-- Pulls existing lyrics from many sources (prioritizing synced lyrics)
-  - Musixmatch (using user’s self-provided token)
+- Pulls existing lyrics (prioritizing synced lyrics)
   - LRCLIB
   - Genius
 - Includes a simple tool for playing a song and syncing while you do so, inspired by https://lrc-maker.github.io.
