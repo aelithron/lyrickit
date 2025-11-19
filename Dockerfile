@@ -53,8 +53,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-ARG IMAGE_TAG="unknown"
-ENV IMAGE_TAG=${IMAGE_TAG:-"unknown"}
+ARG IMAGE_TAG="Unknown Version"
+ENV IMAGE_TAG=${IMAGE_TAG:-"Unknown Version"}
 
 EXPOSE 3000
 ENV PORT 3000

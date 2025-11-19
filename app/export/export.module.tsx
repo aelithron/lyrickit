@@ -7,12 +7,14 @@ import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { SongCard } from "../(ui)/display.module";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function ExportLyrics() {
   const songData = useLiveQuery(() => db.songs.toArray());
   const lyricSongs = songData?.filter((songItem) => songItem.lyrics !== "");
+  const [addMetadata, setAddMetadata] = useState<boolean>(false);
   function downloadLRC(song: Song) {
-    const url = URL.createObjectURL(new Blob([song.lyrics], { type: 'text/plain' }));
+    const url = URL.createObjectURL(new Blob([`${addMetadata ? lrcMetadataTags(song) : ""}${song.lyrics}`], { type: 'text/plain' }));
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', song.lyricFileName);
@@ -23,7 +25,7 @@ export default function ExportLyrics() {
   }
   async function downloadAllLRCs() {
     const zip = new JSZip();
-    for (const song of songData ?? []) zip.file(song.lyricFileName, song.lyrics);
+    for (const song of songData ?? []) zip.file(song.lyricFileName, `${addMetadata ? lrcMetadataTags(song) : ""}${song.lyrics}`);
     const url = URL.createObjectURL(await zip.generateAsync({ type: "blob" }));
     const link = document.createElement('a');
     link.href = url;
@@ -34,11 +36,18 @@ export default function ExportLyrics() {
     URL.revokeObjectURL(url);
   }
   function copyLRC(song: Song) {
-    navigator.clipboard.writeText(song.lyrics);
+    navigator.clipboard.writeText(`${addMetadata ? lrcMetadataTags(song) : ""}${song.lyrics}`);
     alert(`Copied lyrics for ${song.title} - ${(song.artists || ["Unknown Artist"]).join()}.`)
   }
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex flex-col w-fit bg-slate-500 p-2 rounded-lg mt-2">
+        <p className="text-lg">Settings:</p>
+        <div className="flex gap-1">
+          <input type="checkbox" id="metadata" checked={addMetadata} onChange={(e) => setAddMetadata(e.target.checked)} />
+          <label htmlFor="metadata">LRC Metadata Tags</label>
+        </div>
+      </div>
       <button type="button" className="text-lg mt-2 p-1 px-2 bg-violet-300 text-black rounded-lg w-fit hover:text-sky-500" onClick={() => downloadAllLRCs()}><FontAwesomeIcon icon={faDownload} /> Download All</button>
       <div className="grid grid-cols-1 md:grid-cols-3 mt-6 gap-4">
         {lyricSongs?.map((song) => <div className="flex bg-slate-500 p-2 rounded-lg justify-between" key={song.id}>
@@ -59,4 +68,10 @@ export default function ExportLyrics() {
       </div>
     </div>
   );
+}
+
+function lrcMetadataTags(song: Song): string {
+  const durationMinutes = Math.floor(song.duration / 60);
+  const durationSeconds = Math.floor(song.duration % 60);
+  return `[ar:${(song.artists || ["Unknown Artist"]).join()}]\n[al:${(song.album || "Unknown Album")}]\n[ti:${song.title}]\n[length: ${durationMinutes}:${String(durationSeconds).padStart(2, "0")}]\n[tool:LyricKit https://github.com/aelithron/lyrickit]\n\n`;
 }
