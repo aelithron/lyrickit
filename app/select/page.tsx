@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import SongDisplay from "../(ui)/display.module";
-import { UploadSongs } from "./select.module";
+import { SearchSongs, UploadSongs } from "./select.module";
 
 export const metadata: Metadata = {
   title: "Select"
@@ -19,7 +19,7 @@ export default function Page() {
           <p className="text-slate-700 dark:text-slate-300 text-center align-middle">OR</p>
           <div className="flex flex-col items-center">
             <h1 className="text-xl font-semibold">Search for Songs</h1>
-            <p>Coming Soon...</p>
+            <SearchSongs />
           </div>
         </div>
         <SongDisplay />

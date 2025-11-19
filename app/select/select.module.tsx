@@ -3,6 +3,10 @@ import { parseBlob } from "music-metadata";
 import { showOpenFilePicker } from "show-open-file-picker";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMusic, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { MusicBrainzApi } from "musicbrainz-api";
 
 export function UploadSongs() {
   async function processFiles() {
@@ -34,7 +38,7 @@ export function UploadSongs() {
           lyrics: "",
           synced: false,
           audioHandle: handle,
-          lyricFileName: `${file.name.split( /\.[^/.]+$/)[0]}.lrc`,
+          lyricFileName: `${file.name.split(/\.[^/.]+$/)[0]}.lrc`,
           duration: metadata.format.duration || 0,
           fileID: `${file.name}-${file.size}-${file.lastModified}`
         });
@@ -44,5 +48,30 @@ export function UploadSongs() {
       if (!(err as DOMException).message.includes("The user aborted a request.")) console.error(err);
     }
   }
-  return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2 hover:text-sky-500">Select Songs</button>
+  return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2 hover:text-sky-500"><FontAwesomeIcon icon={faMusic} /> Select Songs</button>
+}
+
+export function SearchSongs() {
+  const [title, setTitle] = useState<string>("");
+  const [artist, setArtist] = useState<string>("");
+  const [album, setAlbum] = useState<string>("");
+  const mbApi = new MusicBrainzApi({
+    appName: 'LyricKit',
+    appVersion: process.env.IMAGE_TAG || "Unknown",
+    appContactInfo: 'https://github.com/aelithron/lyrickit',
+  });
+  async function searchSongs() {
+    
+  }
+  return (
+    <form onSubmit={searchSongs} className="flex flex-col mt-2 gap-1">
+      <label htmlFor="title" className="text-sm font-semibold">Title</label>
+      <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-slate-500 rounded-lg p-1" placeholder="Enter a title..." />
+      <label htmlFor="artist">Artist</label>
+      <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} className="bg-slate-500 rounded-lg p-1" placeholder="Enter an artist..." />
+      <label htmlFor="album">Album</label>
+      <input type="text" id="album" value={album} onChange={(e) => setAlbum(e.target.value)} className="bg-slate-500 rounded-lg p-1" placeholder="Enter an album..." />
+      <button type="submit" className="bg-violet-300 p-2 rounded-lg text-black mt-3"><FontAwesomeIcon icon={faSearch} /> Search</button>
+    </form>
+  )
 }
