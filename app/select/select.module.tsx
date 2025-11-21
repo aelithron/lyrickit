@@ -3,10 +3,12 @@ import { parseBlob } from "music-metadata";
 import { showOpenFilePicker } from "show-open-file-picker";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
-import { Dispatch, SetStateAction, useState } from "react";
+import { type Dispatch, type SetStateAction, use, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { IReleaseList, MusicBrainzApi } from "musicbrainz-api";
+import { CoverArtArchiveApi, type IArtistCredit, type IRecordingMatch, MusicBrainzApi } from "musicbrainz-api";
+import Image from "next/image";
+import defaultCover from "@/public/defaultCover.jpeg";
 
 export function UploadSongs() {
   async function processFiles() {
@@ -51,7 +53,7 @@ export function UploadSongs() {
   return <button type="button" onClick={processFiles} className="p-2 rounded-lg bg-violet-300 text-black mt-2 hover:text-sky-500"><FontAwesomeIcon icon={faMusic} /> Select Songs</button>
 }
 
-export function SearchSongs({ setSearchedSongs }: { setSearchedSongs: Dispatch<SetStateAction<IReleaseList[]>> }) {
+export function SearchSongs({ setSearchedSongs }: { setSearchedSongs: Dispatch<SetStateAction<IRecordingMatch[] | null>> }) {
   const [title, setTitle] = useState<string>("");
   const [artist, setArtist] = useState<string>("");
   const mbAPI = new MusicBrainzApi({
@@ -61,8 +63,8 @@ export function SearchSongs({ setSearchedSongs }: { setSearchedSongs: Dispatch<S
   });
   async function searchSongs(e: React.FormEvent) {
     e.preventDefault();
-    const results = await mbAPI.search("release", { query: `query=artist:"${artist}" AND release-group:"${title}"` });
-    setSearchedSongs(results.releases);
+    const results = await mbAPI.search("recording", { query: `query=artist:"${artist}" AND recording:"${title}"` });
+    setSearchedSongs(results.recordings);
   }
   return (
     <form onSubmit={searchSongs} className="flex flex-col mt-2 gap-1">
@@ -74,4 +76,37 @@ export function SearchSongs({ setSearchedSongs }: { setSearchedSongs: Dispatch<S
     </form>
   )
 }
-function
+export function SelectFromSearch({ searchedSongs }: { searchedSongs: IRecordingMatch[] }) {
+
+  return (
+    <div className="flex flex-col gap-3 mt-4 md:col-span-3">
+      <h1 className="text-lg font-semibold">Search Results</h1>
+      {searchedSongs.map((result) => <SearchCard result={result} key={result.id} />)}
+    </div>
+  )
+}
+function SearchCard({ result }: { result: IRecordingMatch }) {
+  const [coverArt, setCoverArt] = useState<string>("");
+  function parseArtistCredit(credit: IArtistCredit[] | undefined): string {
+    const parsedCredit: string[] = [];
+    if (!credit) return "Unknown Artist";
+    for (const artist of credit) parsedCredit.push(artist.name);
+    return parsedCredit.join(', ');
+  }
+  useEffect(() => {
+    const caaAPI = new CoverArtArchiveApi();
+    if (result.releases && result.releases.length > 0) {
+      console.log(use(caaAPI.getReleaseCovers()));
+    }
+  }, [result.releases]);
+  return (
+    <div className="flex bg-slate-700 p-2 rounded-lg gap-2">
+      <Image src={(coverArt !== "") ? coverArt : defaultCover} alt="Album Cover" width={100} height={100} />
+      <div className="flex flex-col">
+        <p className="font-semibold text-lg">{result.title}</p>
+        <p>by {parseArtistCredit(result["artist-credit"])}</p>
+        {result.releases && result.releases.length > 0 && <p>on {result.releases[0].title}</p>}
+      </div>
+    </div>
+  );
+}
