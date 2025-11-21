@@ -94,10 +94,7 @@ function SearchCard({ result }: { result: IRecordingMatch }) {
     return parsedCredit.join(', ');
   }
   useEffect(() => {
-    const caaAPI = new CoverArtArchiveApi();
-    if (result.releases && result.releases.length > 0) {
-      console.log(use(caaAPI.getReleaseCovers()));
-    }
+    fetch(`/api/caacors?mbid=${result.releases}`).then((req) => setCoverArt(req));
   }, [result.releases]);
   return (
     <div className="flex bg-slate-700 p-2 rounded-lg gap-2">
