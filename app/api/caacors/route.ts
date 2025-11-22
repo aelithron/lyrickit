@@ -6,12 +6,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const caaAPI = new CoverArtArchiveApi();
   const mbid = req.nextUrl.searchParams.get("mbid");
   let coverImageURL = new URL(defaultCover.src, req.nextUrl.origin).toString();
+  let valid: boolean = false;
   try {
     if (mbid) {
       const covers = await caaAPI.getReleaseCover(mbid, "front");
       if (covers.url) coverImageURL = covers.url;
+      valid = true;
     }
   } catch {}
   const res = await fetch(coverImageURL);
-  return new NextResponse(res.body, { status: res.status });
+  return new NextResponse(res.body, { status: res.status, headers: { "valid": valid ? "true" : "false" } });
 }

@@ -5,7 +5,7 @@ import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMusic, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faMusic, faPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { type IArtistCredit, type IRecordingMatch, MusicBrainzApi } from "musicbrainz-api";
 
 export function UploadSongs() {
@@ -66,39 +66,64 @@ export function SearchSongs({ setSearchedSongs }: { setSearchedSongs: Dispatch<S
   }
   return (
     <form onSubmit={searchSongs} className="flex flex-col mt-2 gap-1">
-      <label htmlFor="title" className="text-sm font-semibold">Title</label>
+      <label htmlFor="title">Title</label>
       <input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="bg-slate-500 rounded-lg p-1" placeholder="Enter a title..." />
       <label htmlFor="artist">Artist</label>
       <input type="text" id="artist" value={artist} onChange={(e) => setArtist(e.target.value)} className="bg-slate-500 rounded-lg p-1" placeholder="Enter an artist..." />
-      <button type="submit" className="bg-violet-300 p-2 rounded-lg text-black mt-3"><FontAwesomeIcon icon={faSearch} /> Search</button>
+      <button type="submit" className="bg-violet-300 p-2 rounded-lg text-black mt-3 hover:text-sky-500"><FontAwesomeIcon icon={faSearch} /> Search</button>
     </form>
   )
 }
-export function SelectFromSearch({ searchedSongs }: { searchedSongs: IRecordingMatch[] }) {
-
+export function SelectFromSearch({ searchedSongs, setSearchedSongs }: { searchedSongs: IRecordingMatch[], setSearchedSongs: Dispatch<SetStateAction<IRecordingMatch[] | null>> }) {
   return (
     <div className="flex flex-col gap-3 mt-4 md:col-span-3">
       <h1 className="text-lg font-semibold">Search Results</h1>
-      {searchedSongs.map((result) => <SearchCard result={result} key={result.id} />)}
+      {searchedSongs.map((result) => <SearchCard result={result} key={result.id} setSearchedSongs={setSearchedSongs} />)}
+      {searchedSongs.length < 1 && <p className="text-lg">No results found!</p>}
     </div>
   )
 }
-function SearchCard({ result }: { result: IRecordingMatch }) {
-  function parseArtistCredit(credit: IArtistCredit[] | undefined): string {
+function SearchCard({ result, setSearchedSongs }: { result: IRecordingMatch, setSearchedSongs: Dispatch<SetStateAction<IRecordingMatch[] | null>> }) {
+  function parseArtistCredit(credit: IArtistCredit[] | undefined): string[] {
     const parsedCredit: string[] = [];
-    if (!credit) return "Unknown Artist";
+    if (!credit) return ["Unknown Artist"];
     for (const artist of credit) parsedCredit.push(artist.name);
-    return parsedCredit.join(', ');
+    return parsedCredit;
+  }
+  async function selectSong() {
+    const artists = parseArtistCredit(result["artist-credit"]);
+    const cover = await fetch(`/api/caacors${(result.releases && result.releases.length > 0) && `?mbid=${result.releases[0].id}`}`);
+    let coverBlob = null;
+    if (cover.headers.get("valid")) {
+      coverBlob = await cover.blob();
+    }
+    await db.songs.add({
+      title: result.title,
+      album: (result.releases && result.releases.length > 0) ? result.releases[0].title : "Unknown Album",
+      artists: (artists[0] !== "Unknown Artist") ? artists : undefined,
+      cover: coverBlob,
+      fromUser: true,
+      lyrics: "",
+      synced: false,
+      audioHandle: null,
+      lyricFileName: `${result.title} - ${artists.join(", ")}.lrc`,
+      duration: result.length / 1000,
+      fileID: null
+    });
+    setSearchedSongs(null);
   }
   return (
-    <div className="flex bg-slate-700 p-2 rounded-lg gap-2">
-      {/** biome-ignore lint/performance/noImgElement: too dynamic to use Image */}
-      <img src={`/api/caacors${(result.releases && result.releases.length > 0) && `?mbid=${result.releases[0].id}`}`} alt="Album Cover" width={100} height={100} />
-      <div className="flex flex-col">
-        <p className="font-semibold text-lg">{result.title}</p>
-        <p>by {parseArtistCredit(result["artist-credit"])}</p>
-        {(result.releases && result.releases.length > 0) && <p>on {result.releases[0].title}</p>}
+    <div className="flex bg-slate-700 p-2 rounded-lg gap-2 justify-between">
+      <div className="flex gap-2">
+        {/** biome-ignore lint/performance/noImgElement: too dynamic to reasonably use <Image> */}
+        <img src={`/api/caacors${(result.releases && result.releases.length > 0) && `?mbid=${result.releases[0].id}`}`} alt="Album Cover" width={100} height={100} className="rounded-md" />
+        <div className="flex flex-col">
+          <p className="font-semibold text-lg">{result.title}</p>
+          <p>by {parseArtistCredit(result["artist-credit"]).join(", ")}</p>
+          {(result.releases && result.releases.length > 0) && <p>on {result.releases[0].title}</p>}
+        </div>
       </div>
+      <button type="button" onClick={selectSong} className="hover:text-sky-500"><FontAwesomeIcon icon={faPlus} size="xl" /></button>
     </div>
   );
 }

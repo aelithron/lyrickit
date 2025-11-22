@@ -52,7 +52,7 @@ export function SongCard({ song }: { song: Song }) {
           <p className="text-lg font-semibold">{song.title}</p>
           {pathname === "/select" && <button type="button" className="hover:text-sky-500" onClick={async () => (await db.songs.delete(song.id))}><FontAwesomeIcon icon={faTrash} /></button>}
         </div>
-        <p>by {(song.artists || ["Unknown Artist"]).join()}</p>
+        <p>by {(song.artists || ["Unknown Artist"]).join(", ")}</p>
         <p>on {song.album || "Unknown Album"}</p>
       </div>
     </div>
