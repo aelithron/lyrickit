@@ -9,7 +9,7 @@ export default function Home() {
       <h1 className="text-3xl font-semibold">Welcome to Lyric Kit</h1>
       <p>Get started by selecting some songs.</p>
       <Link href={"/select"} className="text-black bg-violet-300 p-1 px-2 rounded-lg w-fit hover:text-sky-500"><FontAwesomeIcon icon={faPlay} /> Get Started</Link>
-      <p className="mt-8 text-slate-500"><FontAwesomeIcon icon={faGithub} /> <a href="https://github.com/aelithron/lyrickit" rel="noopener" target="_blank" className="underline hover:text-sky-500">LyricKit</a> {process.env.IMAGE_TAG || "Unknown Version"}</p>
+      <p className="mt-8 text-slate-500"><FontAwesomeIcon icon={faGithub} /> <a href="https://github.com/aelithron/lyrickit" rel="noopener" target="_blank" className="underline hover:text-sky-500">LyricKit</a> {process.env.IMAGE_TAG}</p>
     </main>
   );
 }
