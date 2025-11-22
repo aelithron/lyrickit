@@ -3,12 +3,10 @@ import { parseBlob } from "music-metadata";
 import { showOpenFilePicker } from "show-open-file-picker";
 import type { Song } from "@/lyrickit";
 import { db } from "@/utils/db";
-import { type Dispatch, type SetStateAction, use, useEffect, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMusic, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { CoverArtArchiveApi, type IArtistCredit, type IRecordingMatch, MusicBrainzApi } from "musicbrainz-api";
-import Image from "next/image";
-import defaultCover from "@/public/defaultCover.jpeg";
+import { type IArtistCredit, type IRecordingMatch, MusicBrainzApi } from "musicbrainz-api";
 
 export function UploadSongs() {
   async function processFiles() {
@@ -86,23 +84,20 @@ export function SelectFromSearch({ searchedSongs }: { searchedSongs: IRecordingM
   )
 }
 function SearchCard({ result }: { result: IRecordingMatch }) {
-  const [coverArt, setCoverArt] = useState<string>("");
   function parseArtistCredit(credit: IArtistCredit[] | undefined): string {
     const parsedCredit: string[] = [];
     if (!credit) return "Unknown Artist";
     for (const artist of credit) parsedCredit.push(artist.name);
     return parsedCredit.join(', ');
   }
-  useEffect(() => {
-    fetch(`/api/caacors?mbid=${result.releases}`).then((req) => setCoverArt(req));
-  }, [result.releases]);
   return (
     <div className="flex bg-slate-700 p-2 rounded-lg gap-2">
-      <Image src={(coverArt !== "") ? coverArt : defaultCover} alt="Album Cover" width={100} height={100} />
+      {/** biome-ignore lint/performance/noImgElement: too dynamic to use Image */}
+      <img src={`/api/caacors${(result.releases && result.releases.length > 0) && `?mbid=${result.releases[0].id}`}`} alt="Album Cover" width={100} height={100} />
       <div className="flex flex-col">
         <p className="font-semibold text-lg">{result.title}</p>
         <p>by {parseArtistCredit(result["artist-credit"])}</p>
-        {result.releases && result.releases.length > 0 && <p>on {result.releases[0].title}</p>}
+        {(result.releases && result.releases.length > 0) && <p>on {result.releases[0].title}</p>}
       </div>
     </div>
   );
