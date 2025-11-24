@@ -1,7 +1,14 @@
 # LyricKit ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/lyrickit)
 A one-stop-shop webapp for everything related to lyrics! \
 Download, write, sync, and export lyrics to be usable where you need them. \
-This was made for Hack Club's [Midnight](https://midnight.hackclub.com), a murder mystery hackathon in Vienna, Austria!
+This project was made for Moonshot, a Hack Club event!
+<div align="center">
+  <a href="https://moonshot.hackclub.com" target="_blank">
+    <img src="https://hc-cdn.hel1.your-objectstorage.com/s/v3/35ad2be8c916670f3e1ac63c1df04d76a4b337d1_moonshot.png" 
+         alt="This project is part of Moonshot, a 4-day hackathon in Florida visiting Kennedy Space Center and Universal Studios!" 
+         style="width: 100%;">
+  </a>
+</div>
 
 ## Features
 - Metadata extractor for uploaded song files
