@@ -18,7 +18,7 @@ This project was made for Moonshot, a Hack Club event!
 - Mobile compatibility
 - Supports many file types
 
-## Using
+## Usage
 Go to [lyrics.novatea.dev](https://lyrics.novatea.dev) in a web browser! Upload your songs and follow the flow illustrated by the sidebar (it goes in order).
 ### Self-hosting
 #### With Docker Compose
