@@ -4,7 +4,7 @@ Download, write, sync, and export lyrics to be usable where you need them. \
 This project was made for Moonshot, a Hack Club event!
 <div align="center">
   <a href="https://moonshot.hackclub.com" target="_blank">
-    <img src="cdn.hackclub.com/rescue?url=https://hc-cdn.hel1.your-objectstorage.com/s/v3/35ad2be8c916670f3e1ac63c1df04d76a4b337d1_moonshot.png" 
+    <img src="https://user-cdn.hackclub-assets.com/019c256f-6bef-72e2-9c9d-a7b972c89b0b/35ad2be8c916670f3e1ac63c1df04d76a4b337d1_moonshot.png" 
          alt="This project is part of Moonshot, a 4-day hackathon in Florida visiting Kennedy Space Center and Universal Studios!" 
          style="width: 100%;">
   </a>
